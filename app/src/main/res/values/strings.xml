@@ -1,0 +1,14 @@
+<!--
+  ~     Copyright (c) 2016 Meituan Inc.
+  ~
+  ~     The right to copy, distribute, modify, or otherwise make use
+  ~     of this software may be licensed only pursuant to the terms
+  ~     of an applicable Meituan license agreement.
+  ~
+  -->
+
+<resources>
+    <string name="app_name">CarouselDemo</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+</resources>
