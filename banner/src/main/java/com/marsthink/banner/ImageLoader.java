@@ -7,11 +7,15 @@
  *
  */
 
-package com.marsthink.carouseldemo;
+package com.marsthink.banner;
+
+import android.content.Context;
+import android.widget.ImageView;
 
 /**
  * Created by zhoumao on 2017/5/25.
  */
 
-public class Banner  {
+public interface ImageLoader {
+    void displayImage(Context context, Object path, ImageView imageView);
 }

@@ -1,4 +1,4 @@
-package com.marsthink.carouseldemo;
+package com.marsthink.bannerdemo;
 
 import org.junit.Test;
 
