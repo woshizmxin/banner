@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.marsthink.banner.adapter.ViewPagerAdapter;
@@ -36,8 +37,9 @@ import java.util.concurrent.TimeUnit;
 
 public class Banner extends FrameLayout {
     private String TAG = "banner";
+    private int mIndicatorWidth = 10, mIndicatorHeight = 10, mIndicatorMargin = 5;
+
     private List<String> titles = new ArrayList<>();
-    private List<View> dots;
     private List<String> imageUrls = new ArrayList();
     private List<ImageView> imageViews = new ArrayList<>();
     private ViewPager mViewPaper;
@@ -51,6 +53,8 @@ public class Banner extends FrameLayout {
     private Context context;
     private TextView tv_title;
     private Handler mHandler = new Handler();
+    private LinearLayout indicatorLayout;
+    private List<ImageView> indicatorImages = new ArrayList<ImageView>();
 
     public static class Transformer {
         public static Class DefaultTransformer = com.marsthink.banner.transformer.DefaultTransformer.class;
@@ -72,11 +76,6 @@ public class Banner extends FrameLayout {
         public static Class CubeInTransformer = com.marsthink.banner.transformer.CubeInTransformer.class;
     }
 
-    private void initAnimationMap() {
-
-    }
-
-
     public Banner(Context context) {
         this(context, null);
     }
@@ -93,7 +92,8 @@ public class Banner extends FrameLayout {
 
     private void initView(Context context) {
         View view = LayoutInflater.from(context).inflate(R.layout.banner, this, true);
-        tv_title = (TextView) findViewById(R.id.tv_title);
+        tv_title = (TextView) view.findViewById(R.id.tv_title);
+        indicatorLayout = (LinearLayout) view.findViewById(R.id.layout_indicator);
         mViewPaper = (ViewPager) view.findViewById(R.id.bannerViewPager);
         adapter = new ViewPagerAdapter();
         mViewPaper.setAdapter(adapter);
@@ -102,8 +102,8 @@ public class Banner extends FrameLayout {
             public void onPageSelected(int position) {
                 if (titles.size() > position) tv_title.setText(titles.get(position));
                 else tv_title.setText("");
-                dots.get(position).setBackgroundResource(R.drawable.dot_focused);
-                dots.get(oldPosition).setBackgroundResource(R.drawable.dot_normal);
+                indicatorImages.get(position).setImageResource(R.drawable.dot_focused);
+                indicatorImages.get(oldPosition).setImageResource(R.drawable.dot_normal);
                 oldPosition = position;
                 currentItem = position;
             }
@@ -118,13 +118,6 @@ public class Banner extends FrameLayout {
 
             }
         });
-        //显示的小点
-        dots = new ArrayList<View>();
-        dots.add(findViewById(R.id.dot_0));
-        dots.add(findViewById(R.id.dot_1));
-        dots.add(findViewById(R.id.dot_2));
-        dots.add(findViewById(R.id.dot_3));
-        dots.add(findViewById(R.id.dot_4));
     }
 
     public void start() {
@@ -177,7 +170,27 @@ public class Banner extends FrameLayout {
             }
         }
         adapter.setImages(imageViews);
+        createIndicator();
         return this;
+    }
+
+    private void createIndicator() {
+        indicatorImages.clear();
+        indicatorLayout.removeAllViews();
+        for (int i = 0; i < imageUrls.size(); i++) {
+            ImageView imageView = new ImageView(context);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mIndicatorWidth, mIndicatorHeight);
+            params.leftMargin = mIndicatorMargin;
+            params.rightMargin = mIndicatorMargin;
+            if (i == 0) {
+                imageView.setImageResource(R.drawable.dot_focused);
+            } else {
+                imageView.setImageResource(R.drawable.dot_normal);
+            }
+            indicatorImages.add(imageView);
+            indicatorLayout.addView(imageView, params);
+        }
     }
 
     public Banner setOnBannerListener(OnBannerListener onBannerListener) {

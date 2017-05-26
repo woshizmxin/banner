@@ -20,53 +20,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ViewPagerAdapter extends PagerAdapter {
-        private List<ImageView> images = new ArrayList<ImageView>();
-        private OnBannerListener onBannerListener = null;
+    private List<ImageView> images = new ArrayList<ImageView>();
+    private OnBannerListener onBannerListener = null;
 
-        public ViewPagerAdapter(List<ImageView> images) {
-            this.images = images;
-        }
-
-        public void setOnBannerListener(OnBannerListener onBannerListener){
-            this.onBannerListener = onBannerListener;
-        }
-
-        public ViewPagerAdapter() {
-        }
-
-        public void setImages(List<ImageView> images) {
-            this.images = images;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getCount() {
-            return images.size();
-        }
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0 == arg1;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup view, int position, Object object) {
-            view.removeView(images.get(position));
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup view, final int position) {
-            // TODO Auto-generated method stub
-            view.addView(images.get(position));
-            if (onBannerListener != null) {
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onBannerListener.OnBannerClick(position);
-                    }
-                });
-            }
-            return images.get(position);
-        }
-
+    public ViewPagerAdapter(List<ImageView> images) {
+        this.images = images;
     }
+
+    public void setOnBannerListener(OnBannerListener onBannerListener) {
+        this.onBannerListener = onBannerListener;
+    }
+
+    public ViewPagerAdapter() {
+    }
+
+    public void setImages(List<ImageView> images) {
+        this.images = images;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getCount() {
+        return images.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View arg0, Object arg1) {
+        return arg0 == arg1;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup view, int position, Object object) {
+        view.removeView(images.get(position));
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup view, final int position) {
+        ImageView imageView = images.get(position);
+        view.addView(imageView);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onBannerListener != null) {
+                    onBannerListener.OnBannerClick(position);
+                }
+            }
+        });
+        return images.get(position);
+    }
+
+}
