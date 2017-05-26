@@ -11,16 +11,18 @@ package com.marsthink.banner;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.marsthink.banner.adapter.ViewPagerAdapter;
+import com.marsthink.banner.listener.ImageLoader;
+import com.marsthink.banner.listener.OnBannerListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +35,13 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class Banner extends FrameLayout {
-    String TAG = "banner";
+    private String TAG = "banner";
     private List<String> titles = new ArrayList<>();
     private List<View> dots;
     private List<String> imageUrls = new ArrayList();
     private List<ImageView> imageViews = new ArrayList<>();
     private ViewPager mViewPaper;
-    private int delayTime = 0;
+    private long delayTime = 2000;
     private ImageLoader imageLoader = null;
     private int currentItem;
     //记录上一次点的位置
@@ -48,6 +50,32 @@ public class Banner extends FrameLayout {
     private ViewPagerAdapter adapter;
     private Context context;
     private TextView tv_title;
+    private Handler mHandler = new Handler();
+
+    public static class Transformer {
+        public static Class DefaultTransformer = com.marsthink.banner.transformer.DefaultTransformer.class;
+        public static Class RotateDownTransformer = com.marsthink.banner.transformer.RotateDownTransformer.class;
+        public static Class ZoomInTransformer = com.marsthink.banner.transformer.ZoomInTransformer.class;
+        public static Class AccordionTransformer = com.marsthink.banner.transformer.AccordionTransformer.class;
+        public static Class DepthPageTransformer = com.marsthink.banner.transformer.DepthPageTransformer.class;
+        public static Class RotateUpTransformer = com.marsthink.banner.transformer.RotateUpTransformer.class;
+        public static Class ZoomOutSlideTransformer = com.marsthink.banner.transformer.ZoomOutSlideTransformer.class;
+        public static Class FlipHorizontalTransformer = com.marsthink.banner.transformer.FlipHorizontalTransformer.class;
+        public static Class ScaleInOutTransformer = com.marsthink.banner.transformer.ScaleInOutTransformer.class;
+        public static Class FlipVerticalTransformer = com.marsthink.banner.transformer.FlipVerticalTransformer.class;
+        public static Class ForegroundToBackgroundTransformer = com.marsthink.banner.transformer.ForegroundToBackgroundTransformer.class;
+        public static Class TabletTransformer = com.marsthink.banner.transformer.TabletTransformer.class;
+        public static Class CubeOutTransformer = com.marsthink.banner.transformer.CubeOutTransformer.class;
+        public static Class StackTransformer = com.marsthink.banner.transformer.StackTransformer.class;
+        public static Class ZoomOutTranformer = com.marsthink.banner.transformer.ZoomOutTranformer.class;
+        public static Class BackgroundToForegroundTransformer = com.marsthink.banner.transformer.BackgroundToForegroundTransformer.class;
+        public static Class CubeInTransformer = com.marsthink.banner.transformer.CubeInTransformer.class;
+    }
+
+    private void initAnimationMap() {
+
+    }
+
 
     public Banner(Context context) {
         this(context, null);
@@ -72,7 +100,7 @@ public class Banner extends FrameLayout {
         mViewPaper.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                if (titles.size()>position) tv_title.setText(titles.get(position));
+                if (titles.size() > position) tv_title.setText(titles.get(position));
                 else tv_title.setText("");
                 dots.get(position).setBackgroundResource(R.drawable.dot_focused);
                 dots.get(oldPosition).setBackgroundResource(R.drawable.dot_normal);
@@ -97,28 +125,32 @@ public class Banner extends FrameLayout {
         dots.add(findViewById(R.id.dot_2));
         dots.add(findViewById(R.id.dot_3));
         dots.add(findViewById(R.id.dot_4));
-
     }
 
     public void start() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         scheduledExecutorService.scheduleWithFixedDelay(
-                new ViewPageTask(),
+                new ViewPagerRunnable(),
                 2,
-                2,
-                TimeUnit.SECONDS);
+                delayTime,
+                TimeUnit.MILLISECONDS);
     }
 
     public Banner setBannerStyle(int bannerStyle) {
         return this;
     }
 
-    public Banner setDelayTime(int delayTime) {
+    public Banner setDelayTime(long delayTime) {
         this.delayTime = delayTime;
         return this;
     }
 
-    public Banner setBannerAnimation() {
+    public Banner setBannerAnimation(Class<? extends ViewPager.PageTransformer> transformer) {
+        try {
+            mViewPaper.setPageTransformer(true, transformer.newInstance());
+        } catch (Exception e) {
+            Log.e(TAG, "Please set the PageTransformer class");
+        }
         return this;
     }
 
@@ -138,73 +170,32 @@ public class Banner extends FrameLayout {
             ImageView imageView = new ImageView(context);
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             imageViews.add(imageView);
-            if (imageLoader != null){
+            if (imageLoader != null) {
                 imageLoader.displayImage(context, imgUrl, imageView);
-            }else {
-                Log.e(TAG,"please setImageLoader() first !");
+            } else {
+                Log.e(TAG, "please setImageLoader() first !");
             }
         }
         adapter.setImages(imageViews);
         return this;
     }
 
-
-    private class ViewPagerAdapter extends PagerAdapter {
-        private List<ImageView> images= new ArrayList<ImageView>();
-
-        public ViewPagerAdapter(List<ImageView> images) {
-            this.images = images;
-        }
-
-        public ViewPagerAdapter() {
-        }
-        public void setImages(List<ImageView> images){
-            this.images = images;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getCount() {
-            return images.size();
-        }
-
-        @Override
-        public boolean isViewFromObject(View arg0, Object arg1) {
-            return arg0 == arg1;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup view, int position, Object object) {
-            // TODO Auto-generated method stub
-//			super.destroyItem(container, position, object);
-//			view.removeView(view.getChildAt(position));
-//			view.removeViewAt(position);
-            view.removeView(images.get(position));
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup view, int position) {
-            // TODO Auto-generated method stub
-            view.addView(images.get(position));
-            return images.get(position);
-        }
-
+    public Banner setOnBannerListener(OnBannerListener onBannerListener) {
+        this.adapter.setOnBannerListener(onBannerListener);
+        return this;
     }
 
-    private class ViewPageTask implements Runnable {
+    private class ViewPagerRunnable implements Runnable {
 
         @Override
         public void run() {
             currentItem = (currentItem + 1) % imageViews.size();
-            mHandler.sendEmptyMessage(0);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mViewPaper.setCurrentItem(currentItem);
+                }
+            });
         }
     }
-
-    private Handler mHandler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
-            mViewPaper.setCurrentItem(currentItem);
-        }
-
-        ;
-    };
 }

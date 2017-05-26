@@ -23,12 +23,21 @@ import java.util.List;
  * @author liuyazhuang
  */
 public class MainActivity extends Activity {
+
+    Banner banner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initBanner();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
 
     private void initBanner() {
         List<String> imgUrls = new ArrayList<>();
@@ -39,9 +48,13 @@ public class MainActivity extends Activity {
         titles.add("1st");
         titles.add("2st");
         titles.add("3st");
-        Banner banner = (Banner) findViewById(R.id.banner);
+        banner  = (Banner) findViewById(R.id.banner);
         banner.setBannerTitles(titles);
-        banner.setImageLoader(new BannerImageLoader()).setImages(imgUrls).start();
+        banner.setImageLoader(new BannerImageLoader())
+                .setImages(imgUrls)
+                .setBannerAnimation(Banner.Transformer.AccordionTransformer)
+                .setDelayTime(2000)
+                .start();
     }
 
 }

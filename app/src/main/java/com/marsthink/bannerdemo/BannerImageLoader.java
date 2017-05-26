@@ -12,7 +12,7 @@ package com.marsthink.bannerdemo;
 import android.content.Context;
 import android.widget.ImageView;
 
-import com.marsthink.banner.ImageLoader;
+import com.marsthink.banner.listener.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 /**

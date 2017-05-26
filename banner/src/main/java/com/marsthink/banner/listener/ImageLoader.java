@@ -7,7 +7,7 @@
  *
  */
 
-package com.marsthink.banner;
+package com.marsthink.banner.listener;
 
 import android.content.Context;
 import android.widget.ImageView;
